@@ -1,11 +1,10 @@
 /**
 * @name Extensions
-* @extends normalized_array
 * @hint 
 */
-component {
+component extends="normalized_array" {
 	public any function init() {
-		NormalizedArray.init(this);
+		super.init(this);
 		return this;
 	}
 
@@ -15,5 +14,13 @@ component {
 		obj.prepend(this.toArray());
 
 		return obj;
+	}
+
+	public any function normalize(extension) {
+		if ('.' === extension[0]) {
+			return extension;
+		}
+
+		return '.' & extension;
 	}
 }

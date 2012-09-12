@@ -1,9 +1,9 @@
-import "vendor/Underscore"
-import "index"
-import "paths"
-import "extensions"
-import "common"
-import "aliases"
+import "vendor/Underscore";
+import "index";
+import "paths";
+import "extensions";
+import "common";
+import "aliases";
 
 /**
 * @name Trail
@@ -49,6 +49,7 @@ component accessors=true {
 		this.setPaths(new Paths(this.root));
 		this.setExtensions(new Extensions());
 		this.setAliases(new Aliases());
+		this.setIndex(new Index());
 		
 
 		return this;

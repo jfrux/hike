@@ -1,7 +1,7 @@
-import "vendor/underscore"
+import "vendor/underscore";
 
 /**
-* @name normalized_array
+* @name Normalized_array
 * @hint 
 */
 component accessors=true {
@@ -11,9 +11,9 @@ component accessors=true {
 			type="boolean"
 			getter="true"
 			default="false";
+
 	property name="arr"
-			type="array"
-			default="#arrayNew()#";
+			type="array";
 
 	public any function init() {
 		variables._ = new vendor.underscore();

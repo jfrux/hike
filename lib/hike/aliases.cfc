@@ -1,5 +1,5 @@
-import "vendor/Underscore"
-import "extensions"
+import "vendor/Underscore";
+import "extensions";
 
 /**
 * @name Aliases
@@ -12,8 +12,7 @@ component accessors=true {
 			default="false";
 
 	property name="map"
-			type="struct"
-			default="#structNew()#";
+			type="struct";
 
 	public any function init() {
 
@@ -58,13 +57,16 @@ component accessors=true {
 
 	public any function freeze() {
 		frozen = true;
-		_.each(map,function(aliases) { aliases.freeze(); });
+		_.each(map,
+			function(aliases) { 
+				aliases.freeze(); 
+			});
 		stub(this,['prepend','append','remove'],"Frozen object.");
 
 		return this;
 	}
 
-	public function any toObject() {
+	public any function toObject() {
 		return _.clone(map);
 	}
 

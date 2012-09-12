@@ -1,7 +1,7 @@
 <cfscript>
-import "lib/hike";
+import "vendor/path";
+path = new vendor.path();
 
-Trail = new lib.hike.Trail();
-
-writeDump(Trail);
+resolved = path.resolve('lib/');
+writeOutput(resolved);
 </cfscript>
