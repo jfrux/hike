@@ -1,21 +1,16 @@
+import "vendor/underscore";
+import "hike/trail";
 /**
 * @name Hike.cfc
 * @hint A port of Hike (ruby) for Coldfusion
 * @introduction
 */
 component {
-	public any function init(obj = {}) {
-		this.obj = arguments.obj;
+	property name="Trail" type="any";
 
-		// _ is referenced throughout this cfc
-		variables._ = this;
-
-		// used as the default iterator
-		_.identity = function(x) { return x; };
-
-		// for uniqueId
-		variables.counter = 1;
-
+	public any function init() {
+		var _ = new vendor.underscore();
+		this.Trail = createObject("component","hike.trail");
 		return this;
 	}
 }
