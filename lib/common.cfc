@@ -1,8 +1,8 @@
 /**
-* @name Paths.cfc
+* @name Common.cfc
 * @hint 
 */
-component {
+component extends="hike" {
 	public any function init() {
 
 		return this;
