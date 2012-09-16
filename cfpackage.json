@@ -1,0 +1,9 @@
+{
+	"name": "cf-hike",
+	"description":"",
+	"version": "0.0.0",
+	"author": "Joshua F. Rountree",
+	"dependencies": {
+		"UnderscoreCF":"~>0.0.0"
+	}
+}
