@@ -4,8 +4,8 @@
 * @hint 
 */
 component extends="hike" {
-	import "vendor.underscore";
-	import "vendor.path";
+	import "cf_modules.UnderscoreCF.underscore";
+	import "cf_modules.cf-path.path";
 	/**
 	* new Index(root, paths, extensions, aliases)
 	**/

@@ -47,15 +47,14 @@ component accessors=true extends="hike" {
 	public any function getIndex() {
 		return new Index(this.root, this.paths, this.extensions, this.aliases);
 	}
-
-
+	
 	function index_proxy(proto, func) {
 		loc = {};
 		loc.proto = arguments.proto;
 		loc.func = arguments.func;
 		
-		loc.proto[loc.func] = function() {
-			var index = this.index;
+		this["#loc.func#"] = function() {
+			var index = this.getIndex();
 
 			return index[loc.func](pathname=this.root);
 		};
