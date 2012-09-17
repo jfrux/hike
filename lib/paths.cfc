@@ -4,9 +4,11 @@
 */
 component extends="normalized_array" {
 	property name="__root__" type="string";
-
+	import "cf_modules.cf-path.path";
 	public any function init(root = "") {
-		variables._ = new vendor.Underscore();
+		super.init(this);
+		variables.path = new Path();
+		variables._ = new cf_modules.UnderscoreCF.Underscore();
 		this.__root__ = arguments.root;
 		return this;
 	}
@@ -21,7 +23,7 @@ component extends="normalized_array" {
 	 **/
 	public any function clone() {
 	  var obj = this.init(this.__root__);
-	  obj.prepend(_.toArray(this));
+	  obj.prepend(this.toArray());
 	  return obj;
 	};
 
@@ -39,12 +41,12 @@ component extends="normalized_array" {
 	 *      paths.toArray();
 	 *      // -> ["/usr/local/tmp", "/tmp"]
 	 **/
-	public any function normalize(path) {
-	  if ('/' NEQ left(path,1)) {
-	    path = resolvePath(this.__root__, path);
+	public any function normalize(p) {
+	  if ('/' NEQ left(p,1)) {
+	    p = path.resolve(this.__root__, p);
 	  }
 
-	  return normalizePath(path);
+	  return path.normalize(p);
 	};
 
 }

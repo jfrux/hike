@@ -3,11 +3,11 @@
 * @hint Public container class for holding paths and extensions.
 */
 component accessors=true extends="hike" {
-	import "vendor.underscore";
-	import "vendor.path";
-	import "vendor.hike.paths";
-	import "vendor.hike.extensions";
-	import "vendor.hike.index";
+	import "cf_modules.UnderscoreCF.underscore";
+	import "cf_modules.cf-path.path";
+	import "paths";
+	import "extensions";
+	import "index";
 	/**
 	* @getter false
 	* @setter false

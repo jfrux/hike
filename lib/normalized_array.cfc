@@ -24,7 +24,7 @@ component {
 	public any function normalize_all() {
 		var theArr = [];
 		args = _.flatten(arguments[1]);
-		
+
 		theArr = _.map(args,function(el) {
 			return this.normalize(el);
 		});

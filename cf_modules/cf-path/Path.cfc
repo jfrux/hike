@@ -9,7 +9,7 @@ component accessors=true {
 	type="string";
 
 	public function init() {
-		variables._ = new underscore.Underscore();
+		variables._ = new underscoreCF.Underscore();
 		
 		variables.jPath = createObject("java","org.apache.commons.io.FilenameUtils");
 		variables.jRegex = createObject("java","java.util.regex.Pattern");
