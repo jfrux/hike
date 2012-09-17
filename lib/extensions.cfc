@@ -17,7 +17,7 @@ component extends="normalized_array" {
 	}
 
 	public any function normalize(extension) {
-		if ('.' === extension[0]) {
+		if (left(extension,1) EQ '.') {
 			return extension;
 		}
 

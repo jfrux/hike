@@ -2,28 +2,34 @@
 * @name Normalized_array
 * @hint 
 */
-component extends="hike" accessors=true {
-	import "vendor.underscore";
-	import "vendor.hike.common";
+component {
+	import "cf_modules.UnderscoreCF.underscore";
+	import "common";
 
 	property name="frozen"
 			type="boolean"
-			getter="true"
 			default="false";
 
 
 	public any function init() {
 		self = this;
 		this.arr = [];
-		variables._ = new vendor.underscore();
+		variables.jArrayUtils = createObject("java","org.apache.commons.lang.ArrayUtils");
+		variables._ = new Underscore();
 		variables.common = new Common();
+		this.frozen = false;
 		return this;
 	}
 
-	public any function normalize_all(els) {
-		return _.flatten(els,_.map(function (el) {
-	      return self.normalize(el);
-	    }));
+	public any function normalize_all() {
+		var theArr = [];
+		args = _.flatten(arguments[1]);
+		
+		theArr = _.map(args,function(el) {
+			return this.normalize(el);
+		});
+		
+		return theArr;
 	}
 
 	/**
@@ -39,24 +45,52 @@ component extends="hike" accessors=true {
 	* prepend('foo', 'bar');
 	**/
 	  public any function prepend() {
-	    this.arr = _.union(this.normalize_all(arguments), this.arr);
+	  	var theArr = [];
+	  	if(listLen(structKeyList(arguments)) GT 1) {
+	  		//individual arguments, instead of single array
+	  		for(i=1; i <= listLen(structKeyList(arguments),","); i++) {
+				theArr.add(arguments[i]);
+			}
+	  	} else {
+	  		//first argument is array of elements
+	  		if(isArray(arguments[1])) {
+	  			theArr = arguments[1];
+	  		} else {
+	  			theArr.add(arguments[1]);
+	  		}
+	  	}
+	  	this.arr = _.union(this.normalize_all(theArr), this.arr);
 	  };
 
 
 	  /**
-	* NormalizedArray#append(*els) -> Void
-	*
-	* Append one or more elements to the tail of the internal array.
-	* Only unique elements are left.
-	*
-	* You can specify list of appended elements as list of arguments or as an
-	* array, thus following are equal:
-	*
-	* append(['foo', 'bar']);
-	* append('foo', 'bar');
-	**/
+		* NormalizedArray#append(*els) -> Void
+		*
+		* Append one or more elements to the tail of the internal array.
+		* Only unique elements are left.
+		*
+		* You can specify list of appended elements as list of arguments or as an
+		* array, thus following are equal:
+		*
+		* append(['foo', 'bar']);
+		* append('foo', 'bar');
+		*/
 	  public any function append() {
-	    this.arr = _.union(this.arr, this.normalize_all(arguments));
+	  	var theArr = [];
+	  	if(listLen(structKeyList(arguments)) GT 1) {
+	  		//individual arguments, instead of single array
+	  		for(i=1; i <= listLen(structKeyList(arguments),","); i++) {
+				theArr.add(arguments[i]);
+			}
+	  	} else {
+	  		//first argument is array of elements
+	  		if(isArray(arguments[1])) {
+	  			theArr = arguments[1];
+	  		} else {
+	  			theArr.add(arguments[1]);
+	  		}
+	  	}
+	  	this.arr = _.union(this.arr, this.normalize_all(theArr));
 	  };
 
 
@@ -66,20 +100,24 @@ component extends="hike" accessors=true {
 	* Remove given `el` from the internal array.
 	**/
 	  public any function remove(el) {
-	    this.arr = _.without(this.arr, self.normalize(el));
+	  	var remArr = [];
+	  	remArr.add(this.normalize(arguments.el));
+	    this.arr = _.without(this.arr, remArr);
 	  };
-
 
 	  /**
 	* NormalizedArray#indexOf(element) -> Number
 	*
-	* Returns index of given `element` starting from `0`.
-	* Returns `-1` when element not found.
+	* Returns index of given `element` starting from `1`.
+	* Returns `0` when element not found.
 	**/
 	  public any function indexOf(element) {
 	    return _.indexOf(this.arr,this.normalize(element));
 	  };
 
+	  public boolean function get() {
+	  	return this.frozen;
+	  }
 
 	  /**
 	* NormalizedArray#toArray() -> Array
@@ -98,9 +136,10 @@ component extends="hike" accessors=true {
 	* Once frozen, any attempt to mutate state will throw an error.
 	**/
 	  public any function freeze() {
-	    frozen = true;
+	    this.frozen = true;
 	    stub = new Common().stub;
 	    stub(this, ['prepend', 'append', 'remove'], "Frozen object.");
 	    return this;
 	  };
+
 }

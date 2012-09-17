@@ -2,13 +2,11 @@
 * @name Paths.cfc
 * @hint 
 */
-component extends="hike" {
-	import "normalized_array";
+component extends="normalized_array" {
 	property name="__root__" type="string";
 
 	public any function init(root = "") {
 		variables._ = new vendor.Underscore();
-		this = _.extend(this,new normalized_array());
 		this.__root__ = arguments.root;
 		return this;
 	}
@@ -42,7 +40,7 @@ component extends="hike" {
 	 *      // -> ["/usr/local/tmp", "/tmp"]
 	 **/
 	public any function normalize(path) {
-	  if ('/' !== path[0]) {
+	  if ('/' NEQ left(path,1)) {
 	    path = resolvePath(this.__root__, path);
 	  }
 

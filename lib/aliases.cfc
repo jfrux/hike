@@ -3,48 +3,62 @@
 * @hint 
 */
 component extends="hike" accessors=true {
-	import "vendor.Underscore";
-	import "vendor.hike.common";
+	import "cf_modules.UnderscoreCF.Underscore";
+	import "common";
 	variables.stub = new Common().stub;
 	import "extensions";
 
 	property name="frozen"
 			type="boolean"
 			getter="true"
-			default="false";
+			setter="true";
 
 	property name="map"
 			type="struct";
 
 	public any function init() {
+		variables.jArrayUtils = createObject("java","org.apache.commons.lang.ArrayUtils");
 		variables._ = new Underscore();
+		variables.Extensions = new Extensions();
 		this.map = {};
+		setFrozen(false);
 		return this;
 	}
 
 	public any function get(ext) {
-		arguments.ext = Extensions.normalize(arguments.ext);
+		theExt = Extensions.normalize(ext);
 
-		if (!this.map[arguments.ext]) {
-			this.map[arguments.ext] = new Extensions();
+		if (NOT structKeyExists(this.map,theExt) OR _.isEmpty(this.map[theExt])) {
+			this.map[theExt] = new Extensions();
 
-			if(this.frozen) {
-				this.map[arguments.ext].freeze();
+			if(this.getFrozen()) {
+				this.map[theExt].freeze();
 			}
 		}
-
-		return this.map[ext];
+		return this.map[theExt];
 	}
 
-	public any function prepend(extension) {
-		this.get(arguments.extension).prepend(_.flatten(arguments).slice(1));
+	public void function prepend(extension) {
+		var aliases = duplicate(arguments);
+		var ext = arguments[1];
+		structDelete(aliases,'extension');
+		
+		for(i=1; i <= listLen(structKeyList(aliases),","); i++) {
+			this.get(ext).prepend(aliases[i]);
+		}
 	}
 
-	public any function append(extension,aliases) {
-		this.get(arguments.extension).append(_.flatten(arguments).slice(1));
+	public void function append(extension) {
+		var aliases = duplicate(arguments);
+		var ext = arguments[1];
+		structDelete(aliases,'extension');
+		
+		for(i=1; i <= listLen(structKeyList(aliases),","); i++) {
+			this.get(ext).append(aliases[i]);
+		}
 	}
 
-	public any function remove(extension,alias) {
+	public void function remove(extension,alias) {
 		this.get(arguments.extension).remove(arguments.alias);
 	}
 
@@ -59,7 +73,7 @@ component extends="hike" accessors=true {
 	}
 
 	public any function freeze() {
-		frozen = true;
+		this.setFrozen(true);
 		_.each(this.map,
 			function(aliases) { 
 				aliases.freeze(); 
