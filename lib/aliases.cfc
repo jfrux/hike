@@ -3,10 +3,6 @@
 * @hint 
 */
 component extends="hike" accessors=true {
-	import "cf_modules.UnderscoreCF.Underscore";
-	import "common";
-	variables.stub = new Common().stub;
-	import "extensions";
 
 	property name="frozen"
 			type="boolean"
@@ -15,6 +11,12 @@ component extends="hike" accessors=true {
 
 	property name="map"
 			type="struct";
+	
+	import "cf_modules.UnderscoreCF.Underscore";
+	import "common";
+	import "extensions";
+
+	variables.stub = new Common().stub;
 
 	public any function init() {
 		variables.jArrayUtils = createObject("java","org.apache.commons.lang.ArrayUtils");
@@ -66,7 +68,7 @@ component extends="hike" accessors=true {
 		var obj = duplicate(this);
 
 		_.each(this.map, function(aliases,ext) {
-			obj.append(arguments.ext,_.toArray(arguments.aliases))
+			obj.append(arguments.ext,_.toArray(arguments.aliases));
 		});
 
 		return obj;

@@ -1,23 +1,20 @@
-/**
-* @name Normalized_array
-* @hint 
-*/
-component {
-	import "cf_modules.UnderscoreCF.underscore";
-	import "common";
 
-	property name="frozen"
-			type="boolean"
-			default="false";
+// `NormalizedArray` is an internal abstract wrapper class that calls
+// a callback `normalize_element` anytime an element is added to the
+// Array.
+// `Extensions` and `Paths` are subclasses of `NormalizedArray`.
 
+component name="normalized_array" extends="cf_modules.Foundry.ArrayComponent" {
+	property name="frozen" type="boolean" default="false";
 
 	public any function init() {
-		self = this;
-		this.arr = [];
-		variables.jArrayUtils = createObject("java","org.apache.commons.lang.ArrayUtils");
-		variables._ = new Underscore();
+		super.init();
+
+		variables._ = new cf_modules.UnderscoreCF.Underscore();
 		variables.common = new Common();
-		this.frozen = false;
+
+		this['frozen'] = false;
+
 		return this;
 	}
 

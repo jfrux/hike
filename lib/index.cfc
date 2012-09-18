@@ -4,18 +4,22 @@
 * @hint 
 */
 component extends="hike" {
-	import "cf_modules.UnderscoreCF.underscore";
-	import "cf_modules.cf-path.path";
+	import "cf_modules.UnderscoreCF.*";
+	import "cf_modules.Path.*";
+	import "cf_modules.RegExp.RegExp";
 	/**
 	* new Index(root, paths, extensions, aliases)
 	**/
 	public any function init(root, paths, extensions, aliases) {
+		variables._ = new Underscore();
+		variables.Path = new Path();
+
 		/** internal, read-only
 		* Index#root -> String
 		*
 		* Root path. This attribute is immutable.
 		**/
-		this.root = arguments.root;
+		this['root'] = arguments.root;
 
 		// Freeze is used here so an error is throw if a mutator method
 		// is called on the array. Mutating `paths`, `extensions`, or
@@ -26,27 +30,28 @@ component extends="hike" {
 		*
 		* Immutable (frozen) [[Paths]] collection.
 		**/
-		this.paths = arguments.paths.clone();
+		this['paths'] = arguments.paths.clone();
 
 		/** read-only
 		* Index#extensions -> Extensions
 		*
 		* Immutable (frozen) [[Extensions]] collection.
 		**/
-		this.extensions = arguments.extensions.clone();
+		this['extensions'] = arguments.extensions.clone();
 
 		/** read-only
 		* Index#aliases -> Aliases
 		*
 		* Immutable map of aliases.
 		**/
-		this.aliases = arguments.aliases.clone();
+		this['aliases'] = arguments.aliases.clone();
 
 		// internal cache
+		this['__entries__'] = {};
+		this['__patterns__'] = {};
+		this['__stats__'] = {};
 
-		this.__entries__ = {};
-		this.__patterns__ = {};
-		this.__stats__ = {};
+		return this;
 	}
 
 
@@ -70,15 +75,16 @@ component extends="hike" {
 	  });
 	}
 
+
 	//HELPERS
 	// escape special chars.
 	// so the string could be safely used as literal in the RegExp.
-	function regexp_escape(str) {
+	public any function regexp_escape(str) {
 	  return rereplaceNoCase(str,"([.?*+{}()\[\]])",'\\$1','all');
 	}
 
 	// tells whenever pathname seems like a relative path or not
-	function is_relative(pathname) {
+	public any function is_relative(pathname) {
 	  return (arrayLen(reMatchNoCase("^\.{1,2}\/",pathname)) GT 0);
 	}
 
@@ -86,26 +92,25 @@ component extends="hike" {
 	//
 	// pattern_for(self, "index.html");
 	// // -> /^index(.html|.htm)(.builder|.erb)*$/
-	function pattern_for(self, basename) {
-	  var aliases;
-	  var extname;
-	  var pattern;
+	public any function pattern_for(self, basename) {
+	  var aliases = [];
+	  var extname = "";
+	  var pattern = "";
 
-	  if (!self.__patterns__[basename]) {
+	  if (NOT structKeyExists(self.__patterns__,basename)) {
 	    extname = path.extname(basename);
 	    aliases = self.aliases.get(extname).toArray();
 
-	    if (0 === aliases.length) {
+	    if (0 EQ arrayLen(aliases)) {
 	      pattern = regexp_escape(basename);
 	    } else {
 	      basename = path.basename(basename, extname);
 	      aliases.addAll(extname);
-	      pattern = regexp_escape(basename) &
-	                 '(?:' & _.map(aliases, regexp_escape).join('|') & ')';
+	      pattern = regexp_escape(basename) & '(?:' & _.map(aliases, regexp_escape).join('|') & ')';
 	    }
 
-	    pattern += '(?:' + _.map(self.extensions.toArray(), regexp_escape).join('|') + ')*';
-	    self.__patterns__[basename] = new RegExp('^' + pattern + '$');
+	    pattern &= '(?:' & arrayToList(_.map(self.extensions.toArray(), regexp_escape),'|') & ')*';
+	    self.__patterns__[basename] = new RegExp('^' & pattern & '$');
 	  }
 
 	  return self.__patterns__[basename];
@@ -114,21 +119,23 @@ component extends="hike" {
 
 	// Checks if the path is actually on the file system and performs
 	// any syscalls if necessary.
-	function match(self, dirname, basename, fn) {
-	  var ret;
-	  var pathname;
-	  var stats;
-	  var pattern;
+	public any function match(self, dirname, basename, fn) {
+	  var ret = "";
+	  var pathname = "";
+	  var stats = "";
+	  var pattern = "";
 	  var matches = self.entries(dirname);
 
 	  pattern = pattern_for(self, basename);
-	  matches = matches.filter(function (m) { return pattern.test(m); });
+	  matches = arrayFilter(matches,function (m) { return pattern.test(m); });
 	  matches = sort_matches(self, matches, basename);
 
-	  while (matches.length && undefined === ret) {
-	    pathname = path.join(dirname, matches.shift());
+	  while (arrayLen(matches) AND "" EQ ret) {
+	  	arrayDeleteAt(matches,1);
+	    pathname = path.join(dirname,matches);
 	    stats = getFileInfo(pathname);
-
+	    WriteLog (text="match[#pathname#]", type="info", file="finds");
+	    
 	    if (stats && stats.isFile()) {
 	      ret = fn(pathname);
 	    }
@@ -139,16 +146,17 @@ component extends="hike" {
 
 
 	// Returns true if `dirname` is a subdirectory of any of the `paths`
-	function contains_path(self, dirname) {
+	public any function contains_path(self, dirname) {
 	  return _.any(self.paths.toArray(), function (path) {
-	    return path === dirname.substr(0, path.length);
+	    return (path EQ mid(dirname,0, path.length));
 	  });
 	}
 
-
 	// Finds relative logical path, `../test/test_trail`. Requires a
 	// `base_path` for reference.
-	function find_in_base_path (self, logical_path, base_path, fn) {
+	public any function find_in_base_path (self, logical_path, base_path, fn) {
+		WriteLog (text="find_in_base_path[#logical_path#]", type="info", file="finds");
+	    
 	  var candidate = path.resolve(base_path, logical_path);
 	  var dirname = path.dirname(candidate);
 	  var basename = path.basename(candidate);
@@ -158,34 +166,31 @@ component extends="hike" {
 	  }
 	}
 
-
 	// Finds logical path across all `paths`
-	function find_in_paths(self, logical_path, fn) {
+	public any function find_in_paths(self, logical_path, fn) {
+		WriteLog (text="find_in_path[#logical_path#]", type="info", file="finds");
+	    
 	  var dirname = path.dirname(logical_path);
 	  var basename = path.basename(logical_path);
 	  var paths = self.paths.toArray();
-	  var pathname;
-
-	  while (paths.length && undefined === pathname) {
-	    pathname = match(self, path.resolve(paths.shift(), dirname), basename, fn);
+	  var pathname = "";
+	  while (arrayLen(paths) AND "" EQ pathname) {
+	  	paths = paths.subList(0,1);
+	  	WriteLog (text="find_in_path while loop[#dirname#, #basename#, #fn#]", type="info", file="finds");
+	    
+	    pathname = match(self, path.resolve(paths, dirname), basename, fn);
 	  }
 
 	  return pathname;
 	}
 
-
 	// PUBLIC //////////////////////////////////////////////////////////////////////
-
-
-	
-
-
 	/**
 	* Index#index -> Index
 	*
 	* Self-reference to be compatable with the [[Trail]] interface.
 	**/
-	public any function getIndex() {
+	public any function get() {
 		return this;
 	};
 
@@ -199,30 +204,33 @@ component extends="hike" {
 	* See [[Trail#find]] for usage.
 	**/
 	public any function find(logical_paths, options, fn) {
-	  var pathname;
-	  var base_path;
-	  var logical_path;
-
-	  if (!fn && _.isFunction(options)) {
-	    fn = options;
-	    options = {};
-	  } else if (!fn) {
-	    return this.find(logical_paths, options, function (p) {
+		var pathname = "";
+		var base_path = "";
+		var logical_path = "";
+		var func = (structKeyExists(arguments,"fn"))? arguments.fn : "";
+		var opts = (structKeyExists(arguments,"options") AND isStruct(arguments.options))? arguments.options : {};
+		WriteLog (text="[#func#]", type="info", file="finds");
+	    
+		if (!_.isFunction(func) AND _.isFunction(opts)) {
+		    func = opts;
+		    opts = {};
+	  } else if (!_.isFunction(func)) {
+	    return this.find(logical_paths, opts, function (p) {
 	      return p;
 	    });
 	  }
 
-	  options = options || {};
-	  base_path = options.basePath || this.root;
-	  logical_paths = _.isArray(logical_paths) ? logical_paths.slice() : [logical_paths];
+	  base_path = (structKeyExists(opts,'basePath'))? opts.basePath : this.root;
+	  logical_paths = _.isArray(logical_paths) ? logical_paths : [logical_paths];
 
-	  while (logical_paths.length && undefined === pathname) {
-	    logical_path = rereplace(logical_paths.pop(),"^\/", '',"ALL");
-
+	  while (arrayLen(logical_paths) GT 0 AND ("" EQ pathname)) {
+	  	arrayDeleteAt(logical_paths,arrayLen(logical_paths));
+	    logical_path = rereplace(arrayToList(logical_paths,"/"),"^\/", '',"ALL");
+	    WriteLog (text="[#logical_path#]", type="info", file="finds");
 	    if (is_relative(logical_path)) {
-	      pathname = find_in_base_path(this, logical_path, base_path, fn);
+	      pathname = find_in_base_path(this, logical_path, base_path, func);
 	    } else {
-	      pathname = find_in_paths(this, logical_path, fn);
+	      pathname = find_in_paths(this, logical_path, func);
 	    }
 	  }
 
@@ -238,18 +246,28 @@ component extends="hike" {
 	* `~` swap files. Returns an empty `Array` if the directory does
 	* not exist.
 	**/
-	public any function entries(pathname) {
-	  if (!this.__entries__[pathname]) {
-	    try {
-	      this.__entries__[pathname] = [];
-	      this.__entries__[pathname] = fs.readdirSync(pathname || '').filter(function (f) {
-	        return (!arrayLen(reMatch("^\.|~$|^\##.*\##$",f)));
-	      }).sort();
-	    } catch (err) {
-	      if ('ENOENT' !== err.code) {
-	        throw err;
-	      }
-	    }
+	public any function entries(pathname = "") {
+		var thePath = arguments.pathname;
+
+	  if (NOT structKeyExists(this.__entries__,thePath)) {
+	    this.__entries__[thePath] = [];
+		 if(directoryExists(this.root & "/" & thePath)) {
+		 	thePaths = directoryList(this.root & "/" & thePath,true,"name");
+		 	thePaths = ArrayFilter(thePaths,function(a) {
+				var regex = new RegExp("^\.|~$|^\##.*\##$");
+				return !regex.test(a);
+			});
+
+			this.__entries__[thePath] = thePaths;
+		  };
+	    // try {
+
+
+	    // } catch (any err) {
+	    //   if ('ENOENT' NEQ err.code) {
+	    //     throw err;
+	    //   }
+	    // }
 	  }
 
 	  return this.__entries__[pathname];
@@ -264,21 +282,32 @@ component extends="hike" {
 	* Retuns `null` if file does not exists.
 	**/
 	public any function stat(pathname) {
-		//writeDump(pathname[1]);
-	  if (!isDefined("theIndex.__stats__[pathname]")) {
-	    try {
-	    	//writeDump(var=pathname,abort=true);
-	      theIndex.__stats__[pathname] = "";
-	      theIndex.__stats__[pathname] = GetFileInfo(pathname);
-	    } catch (err) {
-	      if ('ENOENT' !== err.code) {
-	        throw err;
-	      }
-	    }
-	  }
+		if (structKeyExists(this.__stats__,pathname)) {
+		    try {
+				this.__stats__[pathname] = "";
+				this.__stats__[pathname] = GetFileInfo(pathname);
+		    } catch (any err) {
+		      if ('ENOENT' NEQ err.code) {
+		        throw err;
+		      }
+		    }
 
-	  return theIndex.__stats__[pathname];
+	  		return this.__stats__[pathname];
+		}
+
+		return {};
 	};
+
+	public array function filterArray(Array a, function filter) 
+    { 
+        resultarray = arraynew(1); 
+            for(i=1;i<=ArrayLen(a);i++) 
+            { 
+                if(filter(a[i])) 
+                ArrayAppend(resultarray,a[i]); 
+            } 
+        return resultarray; 
+    } 
 }
 
 // Sorts candidate matches by their extension priority.

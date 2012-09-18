@@ -1,62 +1,50 @@
+import "cf_modules.Path.*";
+import "cf_modules.RegExp.*";
+
 /**
 * @name Trail
 * @hint Public container class for holding paths and extensions.
 */
-component accessors=true extends="hike" {
-	import "cf_modules.UnderscoreCF.underscore";
-	import "cf_modules.cf-path.path";
-	import "paths";
-	import "extensions";
-	import "index";
-	/**
-	* @getter false
-	* @setter false
-	* @hint This is an immutable property.
-	* @default "."
-	**/
+component extends="cf_modules.Foundry.ClassComponent" {
 	property type="string" name="root" default="."; 
-
-	property name="paths"
-			type="any"
-			getter=true
-			setter=true; 
-
-	property name="extensions"
-		getter=true
-		setter=true;
-
-	property name="aliases"
-		getter=true
-		setter=true;
-
+	property name="paths" type="paths";
+	property name="extensions" type="extensions";
+	property name="aliases" type="aliases";
 	property name="index";
 
-	public any function init(root = "") {
-		variables._ = new Underscore();
+	public any function init(root = expandPath("/")) {
+		variables._ = new cf_modules.UnderscoreCF.underscore();
 		variables.path = new Path();
-		this.root = path.resolve((!_.isEmpty(arguments.root))? arguments.root : "");
 		
-		this.paths = new Paths(this.root);
-		this.extensions = new Extensions();
-		this.aliases = new Aliases();
-		this.index = getIndex();
+		this['root'] = path.resolve((!_.isEmpty(arguments.root))? arguments.root : "");
+		this['paths'] = new Paths(this.root);
+		this['extensions'] = new Extensions();
+		this['aliases'] = new Aliases();
+		this['index'] = new Index(this.root, this.paths, this.extensions, this.aliases);
+
+		// internal cache
+		this['__entries__'] = {};
+		this['__patterns__'] = {};
+		this['__stats__'] = {};
 
 		return this;
 	}
 
-	public any function getIndex() {
-		return new Index(this.root, this.paths, this.extensions, this.aliases);
+	public any function get() {
+		return this.index;
 	}
 	
-	function index_proxy(proto, func) {
-		loc = {};
+	public any function index_proxy(proto, func) {
+		var loc = {};
 		loc.proto = arguments.proto;
 		loc.func = arguments.func;
+		self = this;
 		
-		this["#loc.func#"] = function() {
-			var index = this.getIndex();
+		self[loc.func] = function () {
+			var index = self.get();
+			indexFunc = index[loc.func];
 
-			return index[loc.func](pathname=this.root);
+			return indexFunc(argumentCollection=arguments);;
 		};
 	}
 
@@ -120,24 +108,28 @@ component accessors=true extends="hike" {
 	*
 	* function (path) { return path; }
 	**/
-	index_proxy(this, 'find');
-
+	public any function find() {
+		return this.index.find(argumentCollection=arguments);
+	}
 
 	/**
 	* Trail#entries(pathname) -> Array
 	*
 	* Wrapper over [[Index#entries]] using one-time instance of [[Trail#index]].
 	**/
-	index_proxy(this, 'entries');
-
+	
+	public any function entries() {
+		return this.index.entries(argumentCollection=arguments);
+	}
 
 	/**
 	* Trail#stat(pathname) -> Stats|Null
 	*
 	* Wrapper over [[Index#stat]] using one-time instance of [[Trail#index]].
 	**/
-	index_proxy(this, 'stat');
-	
+	public any function stat() {
+		return this.index.stat(argumentCollection=arguments);
+	}
 }
 
 

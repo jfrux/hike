@@ -12,9 +12,10 @@ component extends="hike" {
 	// helper that stubs `obj` with methods throwing error when they are called
 	public any function stub(obj, methods, msg) {
 	  _ = new Underscore();
+	  writeDump(var=arguments,abort=true);
 	  var theMsg = (!_.isEmpty(arguments.msg)) ? (": " & arguments.msg) : "";
-	  obj[methods[1]] = function() {
-	      throw "Can't call `" & method & "()`" & theMsg;
-	    };
+	  // obj[arguments.methods[1]] = function() {
+	  //     throw "Can't call `" & method & "()`" & theMsg;
+	  //   };
 	};
 }

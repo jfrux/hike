@@ -2,14 +2,17 @@
 * @name Paths.cfc
 * @hint 
 */
+
 component extends="normalized_array" {
 	property name="__root__" type="string";
-	import "cf_modules.cf-path.path";
+
+
 	public any function init(root = "") {
 		super.init(this);
-		variables.path = new Path();
+		variables.path = new cf_modules.Path.Path();
 		variables._ = new cf_modules.UnderscoreCF.Underscore();
-		this.__root__ = arguments.root;
+		this['__root__'] = arguments.root;
+
 		return this;
 	}
 
