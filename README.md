@@ -1,4 +1,3 @@
-cf-hike
+Hike
 =======
-
-A CF port of Hike (ruby)
+A ColdFusion library for finding files in specified folders.
