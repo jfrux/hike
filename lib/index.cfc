@@ -136,14 +136,14 @@ component extends="hike" {
 	  var stats = "";
 	  var pattern = "";
 	  var matches = self.entries(dirname);
-	  logger("===================");
-	  logger("===================");
-	  logger("MATCH (self,#dirname#,#basename#,fn)");
+	  // logger("===================");
+	  // logger("===================");
+	  // logger("MATCH (self,#dirname#,#basename#,fn)");
 	  pattern = pattern_for(self, basename);
-	  logger("pattern: " & pattern.getPattern());
+	  //logger("pattern: " & pattern.getPattern());
 	  							
 	  matches = arrayFilter(matches,function (m) {
-	  							logger("matches: " & pattern.test(m));
+	  							//logger("matches: " & pattern.test(m));
 	  							return pattern.test(m); 
 	  						});
 	  matches = sort_matches(self, matches, basename);
@@ -176,15 +176,15 @@ component extends="hike" {
 	  var candidate = path.join(base_path,logical_path);
 	  var dirname = path.dirname(candidate);
 	  var basename = path.basename(candidate);
-	  logger("===================");
-	  logger("===================");
-	  logger("FIND_IN_BASE_PATH(self,'#logical_path#','#base_path#',fn)")
-	  logger("..... logical_path: " & logical_path);
-	  logger("..... base_path: " & base_path);
-	  logger("..... candidate: " & candidate);
-	  logger("..... dirname: " & dirname);
-	  logger("..... basename: " & basename);
-	  logger("..... contains_path: " & contains_path(self,dirname));
+	  // logger("===================");
+	  // logger("===================");
+	  // logger("FIND_IN_BASE_PATH(self,'#logical_path#','#base_path#',fn)")
+	  // logger("..... logical_path: " & logical_path);
+	  // logger("..... base_path: " & base_path);
+	  // logger("..... candidate: " & candidate);
+	  // logger("..... dirname: " & dirname);
+	  // logger("..... basename: " & basename);
+	  // logger("..... contains_path: " & contains_path(self,dirname));
 
 	  if (contains_path(self, dirname)) {
 	    return match(self, dirname, basename, fn);
@@ -195,12 +195,17 @@ component extends="hike" {
 	public any function find_in_paths(self, logical_path, fn) {
 	  var dirname = path.dirname(logical_path);
 	  var basename = path.basename(logical_path);
-	  var paths = self.paths.toArray();
+	  var paths = self.paths;
 	  var pathname = "";
-	  while (arrayLen(paths) AND "" EQ pathname) {
-	  	paths = paths.subList(0,1);
-	  	
-	    pathname = match(self, path.resolve(paths, dirname), basename, fn);
+
+	  logger("===================");
+	  logger("===================");
+	  logger("FIND_IN_PATHS(self,'#logical_path#',fn)")
+	  logger("..... logical_path: " & logical_path);
+	  logger("..... dirname: " & dirname);
+	  logger("..... basename: " & basename);
+	  while (paths.length() AND "" EQ pathname) {
+	  	pathname = match(self, path.resolve(paths.shift(), dirname), basename, fn);
 	  }
 
 	  return pathname;
@@ -248,8 +253,8 @@ component extends="hike" {
 	  while (logical_paths.length() GT 0 AND ("" EQ pathname)) {
 	    logical_path = rereplace(logical_paths.pop(),"^\/", '',"ALL");
 	   	
-	   	logger("logical_path: " & logical_path);
-	    logger("is_relative: " & is_relative(logical_path));
+	   	// logger("logical_path: " & logical_path);
+	    // logger("is_relative: " & is_relative(logical_path));
 	    
 	    if (is_relative(logical_path)) {
 	      pathname = find_in_base_path(this, logical_path, base_path, func);
