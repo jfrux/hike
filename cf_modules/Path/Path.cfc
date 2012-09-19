@@ -486,8 +486,16 @@ component accessors=true {
 		return f;
 	};
 
+	public any function exists(path, callback) {
+	  if(fileExists(path) || directoryExists(path)) {
+	  	return true;
+	  } else {
+	  	return false;
+	  };
+	};
+
 	public any function existsSync(path, callback) {
-	  if(directoryExists(path)) {
+	  if(fileExists(path) || directoryExists(path)) {
 	  	callback();
 	  };
 	};

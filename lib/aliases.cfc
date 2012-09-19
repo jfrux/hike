@@ -12,6 +12,8 @@ component extends="hike" accessors=true {
 	property name="map"
 			type="struct";
 	
+	import "cf_modules.Foundry.*";
+	import "cf_modules.Console.*";
 	import "cf_modules.UnderscoreCF.Underscore";
 	import "common";
 	import "extensions";
@@ -22,6 +24,7 @@ component extends="hike" accessors=true {
 		variables.jArrayUtils = createObject("java","org.apache.commons.lang.ArrayUtils");
 		variables._ = new Underscore();
 		variables.Extensions = new Extensions();
+		variables.Console = new Console();
 		this.map = {};
 		setFrozen(false);
 		return this;
@@ -37,6 +40,7 @@ component extends="hike" accessors=true {
 				this.map[theExt].freeze();
 			}
 		}
+
 		return this.map[theExt];
 	}
 
@@ -65,12 +69,12 @@ component extends="hike" accessors=true {
 	}
 
 	public any function clone() {
-		var obj = duplicate(this);
+		var obj = new Aliases();
 
-		_.each(this.map, function(aliases,ext) {
-			obj.append(arguments.ext,_.toArray(arguments.aliases));
+		structEach(this.map, function(key,value) {
+			obj.append(arguments.key,value.toArray());
 		});
-
+		
 		return obj;
 	}
 

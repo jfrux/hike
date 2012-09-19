@@ -1,4 +1,3 @@
-import "cf_modules.*";
 /**
 * @name Path.cfc
 * @hint A port of Node.js Path for Coldfusion
@@ -9,7 +8,7 @@ component accessors=true {
 	type="string";
 
 	public function init() {
-		variables._ = new underscoreCF.Underscore();
+		variables._ = new cf_modules.UnderscoreCF.Underscore();
 		
 		variables.jPath = createObject("java","org.apache.commons.io.FilenameUtils");
 		variables.jRegex = createObject("java","java.util.regex.Pattern");
@@ -329,8 +328,8 @@ component accessors=true {
     		var resolveTo = resolve(arguments.to);
 
     		//remove first slash
-    		var theFrom = mid(resolveFrom,2);
-		    var theTo = mid(resolveTo,2);
+    		var theFrom = mid(resolveFrom,2,len(resolveFrom));
+		    var theTo = mid(resolveTo,2,len(resolveTo));
 		    writeDump(var=theFrom,label="theFrom");
 		    writeDump(var=theTo,label="theTo");
 		    var fromParts = listToArray(theFrom,"/");
@@ -390,6 +389,7 @@ component accessors=true {
 
 		//posix only
 		} else {
+
 			result = ReMatchGroups(arguments.filename,splitPathRe);
 			device = ((structKeyExists(result,'1') && !_.isEmpty(result['1']))? result['1'] : '');
 			dir = ((structKeyExists(result,'2') && !_.isEmpty(result['2']))? result['2'] : '');
@@ -450,41 +450,44 @@ component accessors=true {
 	}
 
 	public any function dirname(path) {
-	  var result = splitPath(path);
-	  var root = result[1];
-	  var dir = result[2];
-	 if (_.isEmpty(root) && _.isEmpty(dir)) {
-	    // No dirname whatsoever
-	    return '.';
-	  }
+		var result = splitPath(path);
+		var root = result[1];
+		var dir = result[2];
+		
+		if (_.isEmpty(root) && _.isEmpty(dir)) {
+			// No dirname whatsoever
+			return '.';
+		}
 
-	  if (!_.isEmpty(dir)) {
-	    // It has a dirname, strip trailing slash
-	    dir = left(dir,len(dir)-1);
-	  }
-	  return root & dir;
+		if (!_.isEmpty(dir)) {
+			// It has a dirname, strip trailing slash
+			dir = left(dir,len(dir)-1);
+		}
+		
+		return root & dir;
 	};
 
+	public any function basename(path, ext = "") {
+		var f = splitPath(arguments.path)[3];
+		var theExt = arguments.ext;
 
-	public any function basename(path, ext) {
-		var thebasename = ToString(jpath.getBasename(arguments.path));
-		var theext = ToString(jpath.getExtension(arguments.ext));
-		var f = "";
-
-		if(_.isEmpty(theext)) {
-			theext = ToString(jpath.getExtension(arguments.path));
-		}
-		if(structKeyExists(arguments,'ext') AND len(trim(arguments.ext))) {
-			f = thebasename;
-		} else {
-			f = thebasename & "." & theext;
+		if(!_.isEmpty(theext) AND right(f,len(theExt)) EQ theExt) {
+			f = left(f,len(f) - len(theExt));
 		}
 
 		return f;
 	};
 
+	public any function exists(path, callback) {
+	  if(fileExists(path) || directoryExists(path)) {
+	  	return true;
+	  } else {
+	  	return false;
+	  };
+	};
+
 	public any function existsSync(path, callback) {
-	  if(directoryExists(path)) {
+	  if(fileExists(path) || directoryExists(path)) {
 	  	callback();
 	  };
 	};
@@ -498,7 +501,7 @@ component accessors=true {
 	}
 
 	function isAbsolute(str) {
-		return (reFindNoCase("[a-zA-Z]:\\",str) GT 0 || left(str,1) === "/");
+		return (reFindNoCase("[a-zA-Z]:\\",str) GT 0 || left(str,1) EQ "/");
 	}
 
 	function CharAt(str,pos) {
@@ -515,15 +518,15 @@ component accessors=true {
 	*/
 	private array function reSplit(regex,value) {
 		var local = {};
-		local.result = []
+		local.result = [];
 		local.parts = javaCast( "string", arguments.value ).split(
 			javaCast( "string", arguments.regex ),
 			javaCast( "int", -1 )
-		)
+		);
 
 		for (local.part in local.parts) {
-			arrayAppend(local.result,local.part )
-		}
+			arrayAppend(local.result,local.part );
+		};
 
 		return local.result;
 	}
@@ -532,7 +535,7 @@ component accessors=true {
 	* REMatchGroups UDF
 	* @Author Ben Nadel <http://bennadel.com/>
 	*/
-	private array function REMatchGroups(text,pattern,scope) {
+	private struct function REMatchGroups(text,pattern,scope = "all") {
 		var local = structnew();
 		local.results = {};
 		local.pattern =createobject( "java", "java.util.regex.Pattern" ).compile( javacast( "string", arguments.pattern ) );
@@ -557,9 +560,6 @@ component accessors=true {
 		return local.results;
 	}
 
-	private any function varDump(var="",abort=true) {
-		return writeDump(var=arguments.var,abort=arguments.abort);
-	}
 	/**
 	 * Slices an array.
 	 * 

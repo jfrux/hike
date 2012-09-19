@@ -8,9 +8,9 @@ component extends="normalized_array" {
 		return this;
 	}
 
-	public any function clone() {
+	public Extensions function clone() {
 		var obj = new Extensions();
-
+		
 		obj.prepend(this.toArray());
 
 		return obj;

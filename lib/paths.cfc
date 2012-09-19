@@ -18,16 +18,17 @@ component extends="normalized_array" {
 
 	// require('util').inherits(Paths, NormalizedArray);
 
-
 	/**
 	 *  Paths#clone() -> Paths
 	 *
 	 *  Return copy of the instance.
 	 **/
 	public any function clone() {
-	  var obj = this.init(this.__root__);
-	  obj.prepend(this.toArray());
-	  return obj;
+		var obj = new Paths();
+
+		obj.prepend(this.toArray());
+
+		return obj;
 	};
 
 

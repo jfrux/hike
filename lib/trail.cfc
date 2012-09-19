@@ -1,11 +1,10 @@
-import "cf_modules.Path.*";
-import "cf_modules.RegExp.*";
+import "cf_modules.Foundry.lib.*";
 
 /**
 * @name Trail
 * @hint Public container class for holding paths and extensions.
 */
-component extends="cf_modules.Foundry.ClassComponent" {
+component extends="ClassComponent" {
 	property type="string" name="root" default="."; 
 	property name="paths" type="paths";
 	property name="extensions" type="extensions";
@@ -20,18 +19,18 @@ component extends="cf_modules.Foundry.ClassComponent" {
 		this['paths'] = new Paths(this.root);
 		this['extensions'] = new Extensions();
 		this['aliases'] = new Aliases();
-		this['index'] = new Index(this.root, this.paths, this.extensions, this.aliases);
-
+		
 		// internal cache
 		this['__entries__'] = {};
 		this['__patterns__'] = {};
 		this['__stats__'] = {};
 
+		this['index'] = {
+			'get' = function() {
+				return this['index'] = new Index(this.root, this.paths, this.extensions, this.aliases);
+			}
+		}
 		return this;
-	}
-
-	public any function get() {
-		return this.index;
 	}
 	
 	public any function index_proxy(proto, func) {
@@ -109,7 +108,7 @@ component extends="cf_modules.Foundry.ClassComponent" {
 	* function (path) { return path; }
 	**/
 	public any function find() {
-		return this.index.find(argumentCollection=arguments);
+		return this.index.get().find(argumentCollection=arguments);
 	}
 
 	/**
@@ -119,7 +118,7 @@ component extends="cf_modules.Foundry.ClassComponent" {
 	**/
 	
 	public any function entries() {
-		return this.index.entries(argumentCollection=arguments);
+		return this.index.get().entries(argumentCollection=arguments);
 	}
 
 	/**
@@ -128,7 +127,7 @@ component extends="cf_modules.Foundry.ClassComponent" {
 	* Wrapper over [[Index#stat]] using one-time instance of [[Trail#index]].
 	**/
 	public any function stat() {
-		return this.index.stat(argumentCollection=arguments);
+		return this.index.get().stat(argumentCollection=arguments);
 	}
 }
 

@@ -1,10 +1,10 @@
-
+import "cf_modules.Foundry.lib.*";
 // `NormalizedArray` is an internal abstract wrapper class that calls
 // a callback `normalize_element` anytime an element is added to the
 // Array.
 // `Extensions` and `Paths` are subclasses of `NormalizedArray`.
 
-component name="normalized_array" extends="cf_modules.Foundry.ArrayComponent" {
+component name="normalized_array" extends="ArrayComponent" {
 	property name="frozen" type="boolean" default="false";
 
 	public any function init() {
