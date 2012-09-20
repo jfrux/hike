@@ -1,3 +1,6 @@
+import "modules.foundry.lib.*";
+import "modules.underscorecf.*";
+import "trail";
 /**
 * @name Hike.cfc
 * @hint A port of Hike (ruby) for Coldfusion
@@ -7,11 +10,8 @@ component {
 	
 	property name="Trail" type="any";
 
-
-	import "cf_modules.UnderscoreCF.underscore";
-	import "hike.trail";
 	public any function init() {
-		var _ = new vendor.underscore();
+		var _ = new underscore();
 		this.Trail = createObject("component","hike.trail");
 		return this;
 	}

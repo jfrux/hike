@@ -6,11 +6,10 @@
 component extends="normalized_array" {
 	property name="__root__" type="string";
 
-
 	public any function init(root = "") {
-		super.init(this);
-		variables.path = new cf_modules.Path.Path();
-		variables._ = new cf_modules.UnderscoreCF.Underscore();
+		super.init();
+		variables.path = require("path");
+		variables._ = require("underscorecf.underscore");
 		this['__root__'] = arguments.root;
 
 		return this;

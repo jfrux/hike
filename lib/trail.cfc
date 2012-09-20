@@ -1,10 +1,11 @@
-import "cf_modules.Foundry.lib.*";
-
+import "modules.foundry.lib.*";
+import "modules.underscorecf.*";
+import "lib.*";
 /**
 * @name Trail
 * @hint Public container class for holding paths and extensions.
 */
-component extends="ClassComponent" {
+component extends="modules.foundry.lib.ClassComponent" {
 	property type="string" name="root" default="."; 
 	property name="paths" type="paths";
 	property name="extensions" type="extensions";
@@ -12,7 +13,7 @@ component extends="ClassComponent" {
 	property name="index";
 
 	public any function init(root = expandPath("/")) {
-		variables._ = new cf_modules.UnderscoreCF.underscore();
+		variables._ = new Underscore();
 		variables.path = new Path();
 		
 		this['root'] = path.resolve((!_.isEmpty(arguments.root))? arguments.root : "");
@@ -27,9 +28,11 @@ component extends="ClassComponent" {
 
 		this['index'] = {
 			'get' = function() {
-				return this['index'] = new Index(this.root, this.paths, this.extensions, this.aliases);
+				this['index'] = new Index(this.root, this.paths, this.extensions, this.aliases);
+				return this.index;
 			}
-		}
+		};
+
 		return this;
 	}
 	

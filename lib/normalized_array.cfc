@@ -1,16 +1,16 @@
-import "cf_modules.Foundry.lib.*";
+import "modules.foundry.lib.*";
+import "modules.underscorecf.*";
 // `NormalizedArray` is an internal abstract wrapper class that calls
 // a callback `normalize_element` anytime an element is added to the
 // Array.
 // `Extensions` and `Paths` are subclasses of `NormalizedArray`.
 
-component name="normalized_array" extends="ArrayComponent" {
+component name="normalized_array" extends="modules.foundry.lib.ArrayComponent" {
 	property name="frozen" type="boolean" default="false";
 
 	public any function init() {
 		super.init();
-
-		variables._ = new cf_modules.UnderscoreCF.Underscore();
+		
 		variables.common = new Common();
 
 		this['frozen'] = false;
