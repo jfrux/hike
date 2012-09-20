@@ -1,7 +1,7 @@
 /**
 * @name Hike.cfc
 * @hint A port of Hike (ruby) for Coldfusion
-* @introduction
+* @introduction test
 */
 component {
 	
